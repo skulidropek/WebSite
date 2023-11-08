@@ -1,0 +1,52 @@
+﻿@page "/resourses"
+@using Microsoft.EntityFrameworkCore;
+@using WebSite.Components
+@inject NavigationManager NavigationManager;
+@inject DataBaseContextService DataBaseContext;
+
+@if (_resources == null)
+{
+    <p><em>Загрузка...</em></p>
+    return;
+}
+
+<!-- <Search></Search> -->
+
+ <AuthorizeView>
+    <Authorized>
+        <button class="btn btn-primary" onclick="@NavigateToResoursesAdd">Добавить новый ресурс</button>
+    </Authorized>
+</AuthorizeView>
+
+<div class="resource-container">
+    @foreach (var resource in _resources)
+    {
+        <div class="resource-card" @onclick="() => NavigateToResource(resource.Id)">
+            <h4>@resource.Name</h4>
+            <p>@resource.Description</p>
+            <a href="Resource/Download?resourceId=@resource.Id" target="_blank">Скачать</a>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ResourceModel> _resources;
+    private int _take;
+    private int _skip;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _resources = await DataBaseContext.Resources.OrderByDescending(s => s.CreatedDate).Take(10).ToListAsync();
+    }
+
+    private void NavigateToResoursesAdd(object obj)
+    {
+        NavigationManager.NavigateTo("/resourses/add");
+    }
+
+    private void NavigateToResource(Guid resourceId)
+    {
+        NavigationManager.NavigateTo($"/Resource/{resourceId}");
+    }
+}

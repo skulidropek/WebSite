@@ -1,0 +1,118 @@
+﻿@page "/resource/{Id}"
+@using Microsoft.CodeAnalysis.CSharp;
+@using Microsoft.EntityFrameworkCore;
+@using RoslynLibrary.Services;
+@using System.Text;
+@using RoslynLibrary.Extensions;
+@using System.Text.RegularExpressions;
+@using WebSite.Components
+@inject ResourceAnalyzeService ResourceAnalyze;
+@inject NavigationManager NavigationManager;
+@inject DataBaseContextService DataBaseContext;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject PluginFixService PluginFix;
+@inject ChatGptService ChatGptService;
+@inject PluginDiagnosticsAnalyzerService PluginDiagnosticsAnalyzerService;
+@inject CSharpDecompileService CSharpDecompileService;
+
+@if(_resource == null)
+{
+    return;
+}
+
+<div class="resource-card">
+    <h2>@_resource.Name</h2>
+    <p>@_resource.Description</p>
+    <a href="Resource/Download?resourceId=@_resource.Id" target="_blank">Скачать</a>
+    <Console AdditionalText="@_markupString"></Console>
+</div>
+
+<AuthorizeView Roles="root,sponsor">
+    <HxButton class="btn btn-primary" OnClick="Rebuild">Rebuild</HxButton>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private ResourceModel? _resource { get; set; }
+    private MarkupString _markupString { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Guid guidValue;
+
+        if (!Guid.TryParse(Id, out guidValue))
+        {
+            NavigationManager.NavigateTo("/notfound");
+            return;
+        }
+
+        _resource = await DataBaseContext.Resources.FirstOrDefaultAsync(s => s.Id == guidValue);
+
+        if (_resource == null)
+        {
+            // Ресурс не найден. Перенаправляем пользователя на страницу "NotFound".
+            NavigationManager.NavigateTo("/notfound");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_resource.CacheErrors))
+        {
+            _resource.CacheErrors = await ResourceAnalyze.GetAnalyzeText(_resource.UrlOrPatch);
+            DataBaseContext.Resources.Update(_resource);
+            await DataBaseContext.SaveChangesAsync();
+        }
+
+        _markupString = new MarkupString(_resource.CacheErrors);
+    }
+
+    private async void Rebuild(MouseEventArgs mouseEventArgs)
+    {
+        var text = Encoding.UTF8.GetString(await WebSite.Extension.Resource.ReadAllBytesAsync(_resource.UrlOrPatch));
+
+        var tree = CSharpSyntaxTree.ParseText(text);
+
+        var node = await PluginFix.Fix(tree, DataBaseContext.ResourcesAnalyze);
+
+        tree = CSharpSyntaxTree.ParseText(node.ToFullString());
+
+        var errors = await PluginDiagnosticsAnalyzerService.AnalyzeCompilation(tree);
+
+        foreach(var error in errors)
+        {
+            var result = GetMethonInError(error.Text);
+            if(result == null)
+            {
+                continue;
+            }
+            error.Text += "<br>" + $"<span style='color:green;'>Метод {result.MethodName} был обнаружен в классе {result.TypeName}</span><br>";
+            System.Console.WriteLine(error.Text);
+        }
+
+        var analyzeText = ResourceAnalyze.GetAnalyzeText(errors);
+
+        //analyzeText += await ChatGptService.Request(analyzeText);
+        _markupString = new MarkupString(analyzeText);
+        StateHasChanged();
+    }
+
+    public CSharpDecompileService.Result GetMethonInError(string error)
+    {
+        //if (Regex.IsMatch(error, @" не содержит определения ""[\d\w]+"""))
+        //{
+        //    var match = Regex.Match(error, @" не содержит определения ""([\d\w]+)""");
+
+        //    return CSharpDecompileService.Decompile(match.Groups[1].Value);
+        //} 
+        
+        if (Regex.IsMatch(error, @"не удается преобразовать из ""[\d\w]+"""))
+        {
+            var match = Regex.Match(error, @"не удается преобразовать из ""([\d\w]+)""");
+
+            return CSharpDecompileService.Decompile(match.Groups[1].Value);
+        }
+
+        return null;
+    }
+}

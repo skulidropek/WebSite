@@ -1,0 +1,26 @@
+﻿@page "/Account/Manage"
+
+@using BlazorStrap.V5;
+@using BlazorStrap;
+
+<PageTitle>Profile</PageTitle>
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <BSAlert @ref="alert" Color="BSColor.Success" IsDismissible="true">
+        @alertMessage
+    </BSAlert>
+}
+
+<BlazorIdentity.UI.Profile TUser="IdentityUser" OnProfileSaved="HandleProfileSaved" />
+
+@code {
+    private BSAlert? alert;
+    private string? alertMessage;
+
+    private void HandleProfileSaved()
+    {
+        alertMessage = "Profile was successfully updated";
+        alert?.Open();
+    }
+}

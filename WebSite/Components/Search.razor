@@ -1,0 +1,22 @@
+﻿<input type="text" @bind-value="@searchTerm" />
+<button @onclick="SearchResources">Поиск</button>
+
+@code {
+    private string searchTerm;
+
+    private List<ResourceModel> resources; // Предположим, что это ваш список ресурсов
+    private List<ResourceModel> filteredResources;
+
+    private void SearchResources()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            filteredResources = resources; // Если строка поиска пуста, вернуть все ресурсы
+        }
+        else
+        {
+            // Используйте LINQ для фильтрации ресурсов по описанию
+            filteredResources = resources.Where(r => r.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+}

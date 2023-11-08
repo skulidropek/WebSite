@@ -1,0 +1,62 @@
+﻿@page "/resourceanalyze/{Id}"
+@using Microsoft.CodeAnalysis.CSharp;
+@using Microsoft.EntityFrameworkCore;
+@using RoslynLibrary.Services;
+@using System.Text;
+@using RoslynLibrary.Extensions;
+@using WebSite.Components
+@inject PluginDiagnosticsAnalyzerService PluginAnalyzer;
+@inject NavigationManager NavigationManager;
+@inject DataBaseContextService DataBaseContext;
+
+@if(_resource == null)
+{
+    return;
+}
+
+<div class="resource-card">
+    <h2>@_resource.Name</h2>
+    <p>@_resource.Description</p>
+    <a href="Resource/Download?resourceId=@_resource.Id" target="_blank">Скачать</a>
+    <Console AdditionalText="@_markupString"></Console>
+</div>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private ResourceModel _resource { get; set; }
+    private MarkupString _markupString { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Guid guidValue;
+
+        if (!Guid.TryParse(Id, out guidValue))
+        {
+            NavigationManager.NavigateTo("/notfound");
+            return;
+        }
+
+        _resource = await DataBaseContext.Resources.FirstOrDefaultAsync(s => s.Id == guidValue);
+
+        if (_resource == null)
+        {
+            // Ресурс не найден. Перенаправляем пользователя на страницу "NotFound".
+            NavigationManager.NavigateTo("/notfound");
+            return;
+        }
+
+        var text = Encoding.UTF8.GetString(await WebSite.Extension.Resource.ReadAllBytesAsync(_resource.UrlOrPatch));
+
+        var errors = await PluginAnalyzer.AnalyzeCompilation(CSharpSyntaxTree.ParseText(text));
+
+        if (errors == null || errors.Count == 0)
+        {
+            _markupString = new MarkupString("В плагине нет ошибок");
+            return;
+        }
+
+        _markupString = new MarkupString(string.Join("<br>", errors.Select(s => "<span style='color:red;'>" + $"[{s.Line},{s.Symbol}] " + s.Text + "</span>" + " Код:" + s.GetCode())));
+    }
+}

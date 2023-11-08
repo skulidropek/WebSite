@@ -1,0 +1,54 @@
+﻿@page "/resourcesanalyze"
+@using Microsoft.EntityFrameworkCore;
+@using WebSite.Components
+@inject NavigationManager NavigationManager;
+@inject DataBaseContextService DataBaseContext;
+
+@if (_resources == null)
+{
+    <p><em>Загрузка...</em></p>
+    return;
+}
+
+<!-- <Search></Search> -->
+
+<AuthorizeView>
+    <Authorized>
+        <button class="btn btn-primary" onclick="@NavigateToResoursesAdd">Добавить новый ресурс</button>
+    </Authorized>
+</AuthorizeView>
+
+<div class="resource-container">
+    @foreach (var resource in _resources)
+    {
+        <div class="resource-card" @onclick="() => NavigateToResource(resource.Id)">
+            <h4>@resource.ErrorText</h4>
+            <p>@resource.Description</p>
+            <p>Require Analise: @resource.IsRequiresAnalysis</p>
+            <p>Regex Pattern: @resource.RegexPattern</p>
+            <p>Regex Replacement: @resource.RegexReplacement</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ResourceAnalyzeModel> _resources;
+    private int _take;
+    private int _skip;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _resources = await DataBaseContext.ResourcesAnalyze.Take(10).ToListAsync();
+    }
+
+    private void NavigateToResoursesAdd(object obj)
+    {
+        NavigationManager.NavigateTo("/resoursesanalyze/add");
+    }
+
+    private void NavigateToResource(Guid resourceId)
+    {
+        //NavigationManager.NavigateTo($"/resoursesanalyze/{resourceId}");
+    }
+}

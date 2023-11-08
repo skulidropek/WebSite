@@ -1,0 +1,67 @@
+﻿@page "/resoursesanalyze/add"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims;
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+@inject DataBaseContextService DataBaseContext
+
+<EditForm Model="_resource" OnValidSubmit="HandleValidSubmit" class="container">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <HxInputTextArea id="ErrorText" @bind-Value="_resource.ErrorText" class="form-control" Label="Error Text:" />
+    </div>
+
+    <div class="form-group">
+        <HxCheckbox @bind-Value="_resource.IsRequiresAnalysis" Text="Requires Analysis:" />
+    </div>
+
+    <div class="form-group">
+        <HxInputTextArea id="RegexFix" @bind-Value="_resource.RegexPattern" class="form-control" Label="Regex Pattern:" />
+    </div>
+    
+    <div class="form-group">
+        <HxInputTextArea id="RegexFix" @bind-Value="_resource.RegexReplacement" class="form-control" Label="Regex Replacement:" />
+    </div>
+    
+    <div class="form-group">
+        <HxInputTextArea id="Description" @bind-Value="_resource.Description" class="form-control" Label="Description:" />
+    </div>
+
+    <HxButton type="submit" class="btn btn-primary mt-3">Submit</HxButton>
+</EditForm>
+
+@code {
+    private ResourceAnalyzeModel _resource = new ResourceAnalyzeModel();
+
+    private async Task HandleValidSubmit()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            _resource.IdentityUserId = claimValue;
+
+            // Создайте новый EditContext и проверьте его валидность
+            var editContext = new EditContext(_resource);
+            var isValid = editContext.Validate();
+
+            if (!isValid)
+            {
+                // Обработайте ошибку валидации здесь
+                return;
+            }
+
+            await DataBaseContext.ResourcesAnalyze.AddAsync(_resource);
+            await DataBaseContext.SaveChangesAsync();
+            // Здесь вы можете обработать отправку формы, например, отправить данные на сервер
+            NavigationManager.NavigateTo("/resourses");
+        }
+    }
+}

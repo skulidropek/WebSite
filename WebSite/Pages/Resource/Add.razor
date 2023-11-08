@@ -1,0 +1,113 @@
+﻿@page "/resourses/add"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims;
+@using System.Text.RegularExpressions;
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager2
+@inject DataBaseContextService DataBaseContext
+@inject ResourceAnalyzeService ResourceAnalyze
+
+<EditForm Model="_resource" OnValidSubmit="HandleValidSubmit" class="container">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <HxInputText id="Name" @bind-Value="_resource.Name" class="form-control" Label="Name:" />
+    </div>
+
+    <div class="form-group">
+        <HxInputTextArea id="Description" @bind-Value="_resource.Description" class="form-control" Label="Description:" />
+    </div>
+
+    <div class="form-group">
+        <label for="UrlOrPatch">File:</label>
+        <label for="UrlOrPatch">@_message</label>
+        <HxInputFile Accept=".cs" OnChange="HandleFileSelected" />
+        <!-- Элемент прогресса -->
+    </div>
+
+    <HxButton type="submit" class="btn btn-primary mt-3" disabled="@string.IsNullOrEmpty(_resource.UrlOrPatch)">Submit</HxButton>
+</EditForm>
+
+@code {
+    private ResourceModel _resource = new ResourceModel();
+    private double _progress;
+    private object _lock = new object();
+    private string _message;
+
+    private async Task HandleValidSubmit()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            _resource.IdentityUserId = claimValue;
+
+            // Создайте новый EditContext и проверьте его валидность
+            var editContext = new EditContext(_resource);
+            var isValid = editContext.Validate();
+
+            if (!isValid)
+            {
+                // Обработайте ошибку валидации здесь
+                return;
+            }
+
+            _resource.CacheErrors = await ResourceAnalyze.GetAnalyzeText(_resource.UrlOrPatch);
+            _resource.CreatedDate = DateTime.UtcNow;
+            await DataBaseContext.Resources.AddAsync(_resource);
+            await DataBaseContext.SaveChangesAsync();
+            // Здесь вы можете обработать отправку формы, например, отправить данные на сервер
+            NavigationManager.NavigateTo("/resourses");
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        _resource.UrlOrPatch = "";
+
+        var file = e.File;
+        if (file != null)
+        {
+            const int size = 1024 * 1024 * 100;
+
+            if (file.Size > size)
+            {
+                _message = $"Файл слишком много весит {file.Size}! Ограничение в {size}";
+                return;
+            }
+
+            Random random = new Random();
+            // Здесь вы можете обработать выбранный файл
+            var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 100).CopyToAsync(ms);
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                _resource.IdentityUserId = claimValue;
+                var path = Path.Combine(Path.Combine("Files", claimValue), random.Next(0, 100) + file.Name);
+
+                await WebSite.Extension.File.WriteWithProgressAsync(path, ms.ToArray(), (progress) =>
+                {
+                    if (_progress + 5 <= progress)
+                    {
+                        _progress = progress;
+                        _message = _progress + "/100";
+                        StateHasChanged();
+                    }
+                });
+                _message = "100/100";
+                _resource.UrlOrPatch = path;
+            }
+        }
+    }
+}

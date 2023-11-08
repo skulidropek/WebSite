@@ -1,0 +1,25 @@
+﻿@page "/websitesetting/adminusercreate"
+@inject NavigationManager Navigation
+@inject UserManager<IdentityUser> UserManager
+
+<PageTitle>Create root user</PageTitle>
+
+<h3>Create root user</h3>
+
+<BlazorIdentity.UI.Register TUser="IdentityUser" OnRegistered="HandleRegistered" />
+
+@code {
+    private async Task<IdentityUser> HandleRegistered(bool requireConfirmedAccount, IdentityUser identityUser)
+    {
+        if (requireConfirmedAccount)
+        {
+        }
+        else
+        {
+            await UserManager.AddToRoleAsync(identityUser, "root");
+            Navigation.NavigateTo("/");
+        }
+
+        return identityUser;
+    }
+}

@@ -1,0 +1,31 @@
+﻿.console {
+    background-color: black;
+    color: green;
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    border: solid 2px #888;
+    border-radius: 5px;
+    height: 600px;
+    overflow-y: auto;
+}
+
+.console .text {
+    color: lime;
+}
+
+.console .error {
+    color: red;
+}
+
+/* Стили для полосы прокрутки */
+.console::-webkit-scrollbar {
+    width: 12px;
+}
+
+.console::-webkit-scrollbar-track {
+    background: #888;
+}
+
+.console::-webkit-scrollbar-thumb {
+    background: #555;
+}
