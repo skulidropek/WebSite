@@ -11,6 +11,7 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
     private readonly PluginDiagnosticsAnalyzerService _pluginDiagnosticsAnalyzer;
     private IEnumerable<AnalyzeBaseModel> _analyzeBaseModels;
     private IEnumerable<CompilationErrorModel> _compilationErrors;
+
     public CodeErrorFixerService(PluginDiagnosticsAnalyzerService pluginDiagnosticsAnalyzer)
     {
         _pluginDiagnosticsAnalyzer = pluginDiagnosticsAnalyzer;
@@ -18,12 +19,36 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
 
     public async Task<SyntaxNode> VisitAndFixErrors(SyntaxNode node, IEnumerable<AnalyzeBaseModel> analyzeBaseModels)
     {
-        _analyzeBaseModels = analyzeBaseModels.Where(s => s.IsRequiresAnalysis);
+        _compilationErrors = await _pluginDiagnosticsAnalyzer.AnalyzeCompilationAsync(node.SyntaxTree);
 
-        if (_compilationErrors == null)
+        if (_compilationErrors.Count() == 0)
+            return node;
+
+        List<AnalyzeBaseModel> analyzeAllModels = new List<AnalyzeBaseModel>();
+        List<AnalyzeBaseModel> analyzeBaseNotAllModels = new List<AnalyzeBaseModel>();
+
+        foreach(var analyzeBaseModel in analyzeBaseModels)
         {
-            _compilationErrors = await _pluginDiagnosticsAnalyzer.AnalyzeCompilation(node.SyntaxTree);
+            if (analyzeBaseModel.AnalyzeType == AnalyzeType.All)
+            {
+                analyzeAllModels.Add(analyzeBaseModel);
+                continue;
+            }
+
+            analyzeBaseNotAllModels.Add(analyzeBaseModel);
         }
+
+        _analyzeBaseModels = analyzeAllModels;
+
+        foreach(var analysisBaseModel in analyzeAllModels)
+        {
+            node = FixCompilationError(node, DeclarationType.All);
+        }
+
+        if(analyzeBaseNotAllModels == null || analyzeBaseNotAllModels.Count == 0)
+            return node;
+
+        _analyzeBaseModels = analyzeBaseNotAllModels;
 
         return base.Visit(node);
     }
@@ -47,14 +72,46 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
 
         foreach (var error in errors)
         {
-            foreach(var analyze in error.AnalyzeBaseModels)
+            foreach(var analyze in error.AnalyzeBaseModels.Where(s => 
+                                        declarationType == DeclarationType.All ||
+                                        s.DeclarationType == declarationType)
+                )
             {
+                var regexPattern = analyze.RegexPattern;
+                var regexReplacement = analyze.RegexReplacement;
+
                 var match = Regex.Match(error.CompilationErrorModel.Text, analyze.ErrorText);
 
-                var code = error.CompilationErrorModel.GetCode();
-                var lineCode = error.CompilationErrorModel.Location.ToCodeLineString();
-                Console.WriteLine(code + " " + Regex.Replace(code, analyze.RegexPattern, analyze.RegexReplacement));
-                nodeText = nodeText.Replace(lineCode, lineCode.Replace(code, Regex.Replace(code, analyze.RegexPattern, analyze.RegexReplacement)));
+                for (int i = 0; i < match.Groups.Count; i++)
+                {
+                    regexPattern = regexPattern.Replace($"$errorGroup{i}", match.Groups[i].Value);
+                    regexReplacement = regexReplacement.Replace($"$errorGroup{i}", match.Groups[i].Value);
+                }
+
+                switch (analyze.AnalyzeType)
+                {
+                    case AnalyzeType.Error:
+                        {
+                            var code = error.CompilationErrorModel.Location.ToCodeLocationString();
+
+                            var lineCode = error.CompilationErrorModel.Location.ToCodeLineString();
+                            nodeText = nodeText.Replace(lineCode, lineCode.Replace(code, Regex.Replace(code, regexPattern, regexReplacement)));
+                        }
+                        break;
+
+                    case AnalyzeType.Line:
+                        {
+                            var code = error.CompilationErrorModel.Location.ToCodeLineString();
+                            nodeText = nodeText.Replace(code, Regex.Replace(code, regexPattern, regexReplacement));
+                        }
+                        break;
+                    
+                    case AnalyzeType.Method:
+                    case AnalyzeType.All:
+                        nodeText = Regex.Replace(nodeText, regexPattern, regexReplacement);
+                        break;
+
+                }
             }
         }
 
@@ -64,8 +121,7 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
     private SyntaxNode ToSyntaxNode(string code)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-        var getRoot = syntaxTree.GetRoot().DescendantNodes().FirstOrDefault();
-        return getRoot;
+        return syntaxTree.GetRoot();
     }
 
     public bool TryGetCompilationError((int, int) location, out List<AnalyzeCompilationErrorModel> errorsOut)

@@ -77,7 +77,7 @@
 
         tree = CSharpSyntaxTree.ParseText(node.ToFullString());
 
-        var errors = await PluginDiagnosticsAnalyzerService.AnalyzeCompilation(tree);
+        var errors = await PluginDiagnosticsAnalyzerService.AnalyzeCompilationAsync(tree);
 
         foreach(var error in errors)
         {

@@ -7,7 +7,7 @@ namespace RoslynLibrary.Models
     {
         public string ErrorText { get; set; }
         public bool IsRequiresAnalysis { get; set; }
-        //public AnalyzeType AnalyzeType { get; set; }
+        public AnalyzeType AnalyzeType { get; set; }
         public string RegexPattern { get; set; }
         public string RegexReplacement { get; set; }
 

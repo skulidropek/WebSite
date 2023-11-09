@@ -49,7 +49,7 @@
 
         var text = Encoding.UTF8.GetString(await WebSite.Extension.Resource.ReadAllBytesAsync(_resource.UrlOrPatch));
 
-        var errors = await PluginAnalyzer.AnalyzeCompilation(CSharpSyntaxTree.ParseText(text));
+        var errors = await PluginAnalyzer.AnalyzeCompilationAsync(CSharpSyntaxTree.ParseText(text));
 
         if (errors == null || errors.Count == 0)
         {

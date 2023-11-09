@@ -26,7 +26,7 @@ namespace RoslynLibrary.Services
             _managedSection = managedSection.Value;
         }
 
-        public async Task<List<CompilationErrorModel>> AnalyzeCompilation(SyntaxTree syntaxTree)
+        public async Task<List<CompilationErrorModel>> AnalyzeCompilationAsync(SyntaxTree syntaxTree)
         {
             var errors = new List<CompilationErrorModel>();
 

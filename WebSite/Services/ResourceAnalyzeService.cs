@@ -25,7 +25,7 @@ namespace WebSite.Services
         
         public async Task<string> GetAnalyzeText(SyntaxTree tree)
         {
-            var errors = await _pluginAnalyzer.AnalyzeCompilation(tree);
+            var errors = await _pluginAnalyzer.AnalyzeCompilationAsync(tree);
 
             return GetAnalyzeText(errors);
         }
