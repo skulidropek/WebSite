@@ -1,0 +1,51 @@
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using RoslynLibrary.Extensions;
+using RoslynLibrary.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace RoslynLibrary.Services.Analyzer
+{
+    internal class ErrorAnalyzer : IAnalyzer
+    {
+        public bool CanHandle(AnalyzeType analyzeType)
+        {
+            return analyzeType == AnalyzeType.Error;
+        }
+
+        public string Analyze(CompilationErrorModel error, string nodeText, string regexPattern, string regexReplacement)
+        {
+            var code = error.Location.ToCodeLocationString();
+
+            var obj = CSharpScript.RunAsync(code, ScriptOptions.Default.WithImports("System")).GetAwaiter().GetResult();
+                     // .ContinueWith("Test.PrintLine(\"Hello World\");");
+
+            //regexPattern = regexPattern.Replace("$this", code);
+            regexReplacement = regexReplacement.Replace("$this", code);
+
+            var lineCode = error.Location.ToCodeLineString();
+
+            if (regexPattern == "$this")
+            {
+                nodeText = nodeText.Replace(lineCode,
+                   lineCode.Replace(code, regexReplacement)
+                   );
+            }
+            else
+            {
+                nodeText = nodeText.Replace(lineCode,
+                   lineCode.Replace(code,
+                           Regex.Replace(code, regexPattern, regexReplacement)
+                       )
+                   );
+            }
+
+            return nodeText;
+        }
+    }
+}

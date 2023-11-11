@@ -5,16 +5,20 @@ using RoslynLibrary.Models;
 using RoslynLibrary.Extensions;
 using RoslynLibrary.Services;
 using System.Text.RegularExpressions;
+using RoslynLibrary.Services.Analyzer;
 
 public class CodeErrorFixerService : CSharpSyntaxRewriter
 {
     private readonly PluginDiagnosticsAnalyzerService _pluginDiagnosticsAnalyzer;
+    private readonly IEnumerable<IAnalyzer> _analyzers;
     private IEnumerable<AnalyzeBaseModel> _analyzeBaseModels;
     private IEnumerable<CompilationErrorModel> _compilationErrors;
 
-    public CodeErrorFixerService(PluginDiagnosticsAnalyzerService pluginDiagnosticsAnalyzer)
+
+    public CodeErrorFixerService(PluginDiagnosticsAnalyzerService pluginDiagnosticsAnalyzer, IEnumerable<IAnalyzer> analyzers)
     {
         _pluginDiagnosticsAnalyzer = pluginDiagnosticsAnalyzer;
+        _analyzers = analyzers;
     }
 
     public async Task<SyntaxNode> VisitAndFixErrors(SyntaxNode node, IEnumerable<AnalyzeBaseModel> analyzeBaseModels)
@@ -88,68 +92,72 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
                     regexReplacement = regexReplacement.Replace($"$errorGroup{i}", match.Groups[i].Value);
                 }
 
-                switch (analyze.AnalyzeType)
-                {
-                    case AnalyzeType.Error:
-                        {
-                            var code = error.CompilationErrorModel.Location.ToCodeLocationString();
 
-                            //regexPattern = regexPattern.Replace("$this", code);
-                            regexReplacement = regexReplacement.Replace("$this", code);
+                IAnalyzer analyzer = _analyzers.First(a => a.CanHandle(analyze.AnalyzeType));
+                nodeText = analyzer.Analyze(error.CompilationErrorModel, nodeText, regexPattern, regexReplacement);
 
-                            var lineCode = error.CompilationErrorModel.Location.ToCodeLineString();
+                //switch (analyze.AnalyzeType)
+                //{
+                //    case AnalyzeType.Error:
+                //        {
+                //            var code = error.CompilationErrorModel.Location.ToCodeLocationString();
 
-                            if(regexPattern == "$this")
-                            {
-                                nodeText = nodeText.Replace(lineCode,
-                                   lineCode.Replace(code, regexReplacement)
-                                   );
-                            }
-                            else
-                            {
-                                nodeText = nodeText.Replace(lineCode,
-                                   lineCode.Replace(code,
-                                           Regex.Replace(code, regexPattern, regexReplacement)
-                                       )
-                                   );
-                            }
+                //            //regexPattern = regexPattern.Replace("$this", code);
+                //            regexReplacement = regexReplacement.Replace("$this", code);
 
-                        }
-                        break;
+                //            var lineCode = error.CompilationErrorModel.Location.ToCodeLineString();
 
-                    case AnalyzeType.Line:
-                        {
-                            var code = error.CompilationErrorModel.Location.ToCodeLineString();
+                //            if(regexPattern == "$this")
+                //            {
+                //                nodeText = nodeText.Replace(lineCode,
+                //                   lineCode.Replace(code, regexReplacement)
+                //                   );
+                //            }
+                //            else
+                //            {
+                //                nodeText = nodeText.Replace(lineCode,
+                //                   lineCode.Replace(code,
+                //                           Regex.Replace(code, regexPattern, regexReplacement)
+                //                       )
+                //                   );
+                //            }
 
-                            regexReplacement = regexReplacement.Replace("$this", code);
+                //        }
+                //        break;
 
-                            if (regexPattern == "$this")
-                            {
-                                nodeText = nodeText.Replace(code, regexReplacement);
-                            }
-                            else
-                            {
-                                nodeText = nodeText.Replace(code,
-                                    Regex.Replace(code, regexPattern, regexReplacement)
-                                );
-                            }
-                        }
-                        break;
+                //    case AnalyzeType.Line:
+                //        {
+                //            var code = error.CompilationErrorModel.Location.ToCodeLineString();
 
-                    case AnalyzeType.Method:
-                    case AnalyzeType.All:
-                        regexReplacement = regexReplacement.Replace("$this", nodeText);
+                //            regexReplacement = regexReplacement.Replace("$this", code);
 
-                        if (regexPattern == "$this")
-                        {
-                            nodeText = nodeText.Replace(nodeText, regexReplacement);
-                        }
-                        else
-                        {
-                            nodeText = Regex.Replace(nodeText, regexPattern, regexReplacement);
-                        }
-                        break;
-                }
+                //            if (regexPattern == "$this")
+                //            {
+                //                nodeText = nodeText.Replace(code, regexReplacement);
+                //            }
+                //            else
+                //            {
+                //                nodeText = nodeText.Replace(code,
+                //                    Regex.Replace(code, regexPattern, regexReplacement)
+                //                );
+                //            }
+                //        }
+                //        break;
+
+                //    case AnalyzeType.Method:
+                //    case AnalyzeType.All:
+                //        regexReplacement = regexReplacement.Replace("$this", nodeText);
+
+                //        if (regexPattern == "$this")
+                //        {
+                //            nodeText = nodeText.Replace(nodeText, regexReplacement);
+                //        }
+                //        else
+                //        {
+                //            nodeText = Regex.Replace(nodeText, regexPattern, regexReplacement);
+                //        }
+                //        break;
+                //}
             }
         }
 

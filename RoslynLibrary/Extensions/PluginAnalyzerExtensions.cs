@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using RoslynLibrary.Sections;
 using RoslynLibrary.Services;
+using RoslynLibrary.Services.Analyzer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,10 @@ namespace RoslynLibrary.Extensions
             services.AddScoped<CodeErrorFixerService>();
 
             services.AddScoped<CSharpDecompileService>();
+
+            services.AddScoped<IAnalyzer, ErrorAnalyzer>();
+            services.AddScoped<IAnalyzer, LineAnalyzer>();
+            services.AddScoped<IAnalyzer, MethodAnalyzer>();
 
             return services;
         }

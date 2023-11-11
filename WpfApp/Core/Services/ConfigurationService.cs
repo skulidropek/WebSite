@@ -117,7 +117,12 @@ namespace WpfApp.Core.Services
                 ErrorText = @"""ItemCraftTask"" не содержит определения ""owner"".+",
                 AnalyzeType = AnalyzeType.Line,
                 DeclarationType = DeclarationType.All,
-                RegexPattern = @"GetIdealContainer\((.+)\)",
+                RegexPattern = @"
+var code = ""$this"";
+if(code.Contains(""itemCrafterOwner""))
+{
+  Console.WriteLine(""Выыфвыфв"");
+}",
                 RegexReplacement = "GetIdealContainer($1, true)",
                 Description = "Добавляет в метод GetIdealContainer булево true",
             },

@@ -34,13 +34,18 @@ namespace ConsoleApp1
                     ErrorText = "Аргумент 1: не удается преобразовать из \"(NetworkableId)\" в \"uint\".",
                     AnalyzeType = AnalyzeType.All,
                     DeclarationType = DeclarationType.All,
-                    RegexPattern = "uint",
+                    RegexPattern = @"
+var code = ""$this"";
+if(code.Contains(""uint""))
+{
+  net.ID
+}",
                     RegexReplacement = "ulong"
                 }
             });
 
             tree = CSharpSyntaxTree.ParseText(node.ToFullString());
-            Console.WriteLine(tree.ToString());
+            //Console.WriteLine(tree.ToString());
 
             var errors = await _pluginDiagnosticsAnalyzerService.AnalyzeCompilationAsync(tree);
 
