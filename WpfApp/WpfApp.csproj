@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="wwwroot\Images\192.png" />
+    <None Remove="wwwroot\Images\Background.png" />
+    <None Remove="wwwroot\Images\BtnBoosty.png" />
+    <None Remove="wwwroot\Images\BtnClose.png" />
+    <None Remove="wwwroot\Images\BtnDiscord.png" />
+    <None Remove="wwwroot\Images\BtnFriends.png" />
+    <None Remove="wwwroot\Images\BtnLanguage.png" />
+    <None Remove="wwwroot\Images\BtnYouTube.png" />
+    <None Remove="wwwroot\Images\eng.png" />
+    <None Remove="wwwroot\Images\favicon.png" />
+    <None Remove="wwwroot\Images\fioletov.png" />
+    <None Remove="wwwroot\Images\Logo.png" />
+    <None Remove="wwwroot\Images\Screenshot_1 1.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RoslynLibrary\RoslynLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="wwwroot\Images\192.png" />
+    <Resource Include="wwwroot\Images\Background.png" />
+    <Resource Include="wwwroot\Images\BtnBoosty.png" />
+    <Resource Include="wwwroot\Images\BtnClose.png" />
+    <Resource Include="wwwroot\Images\BtnDiscord.png" />
+    <Resource Include="wwwroot\Images\BtnFriends.png" />
+    <Resource Include="wwwroot\Images\BtnLanguage.png" />
+    <Resource Include="wwwroot\Images\BtnYouTube.png" />
+    <Resource Include="wwwroot\Images\eng.png" />
+    <Resource Include="wwwroot\Images\favicon.png" />
+    <Resource Include="wwwroot\Images\fioletov.png" />
+    <Resource Include="wwwroot\Images\Logo.png" />
+    <Resource Include="wwwroot\Images\Screenshot_1 1.png" />
+  </ItemGroup>
+
+</Project>
