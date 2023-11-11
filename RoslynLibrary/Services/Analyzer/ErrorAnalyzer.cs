@@ -1,4 +1,6 @@
-﻿using RoslynLibrary.Extensions;
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using RoslynLibrary.Extensions;
 using RoslynLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,9 @@ namespace RoslynLibrary.Services.Analyzer
         public string Analyze(CompilationErrorModel error, string nodeText, string regexPattern, string regexReplacement)
         {
             var code = error.Location.ToCodeLocationString();
+
+            var obj = CSharpScript.RunAsync(code, ScriptOptions.Default.WithImports("System")).GetAwaiter().GetResult();
+                     // .ContinueWith("Test.PrintLine(\"Hello World\");");
 
             //regexPattern = regexPattern.Replace("$this", code);
             regexReplacement = regexReplacement.Replace("$this", code);
