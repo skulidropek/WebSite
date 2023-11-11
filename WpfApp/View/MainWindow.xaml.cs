@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfApp.Core.Services;
+using WpfApp.Core;
+using WpfApp.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WpfApp
 {
@@ -23,6 +27,20 @@ namespace WpfApp
         public MainWindow()
         {
             InitializeComponent();
+            var pageService = ServiceManager.ServiceProvider.GetRequiredService<PageService>();
+            pageService.Initilization(FrameMain);
+            DataContext = new MainWindowViewModel();
+        }
+
+        private void CloseUI(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void BorderTopSection_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
         }
     }
 }

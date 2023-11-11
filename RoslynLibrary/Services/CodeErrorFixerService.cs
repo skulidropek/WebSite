@@ -72,8 +72,8 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
 
         foreach (var error in errors)
         {
-            foreach(var analyze in error.AnalyzeBaseModels.Where(s => 
-                                        declarationType == DeclarationType.All ||
+            foreach (var analyze in error.AnalyzeBaseModels.Where(s =>
+                                        s.DeclarationType == DeclarationType.All ||
                                         s.DeclarationType == declarationType)
                 )
             {
@@ -94,34 +94,82 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
                         {
                             var code = error.CompilationErrorModel.Location.ToCodeLocationString();
 
+                            //regexPattern = regexPattern.Replace("$this", code);
+                            regexReplacement = regexReplacement.Replace("$this", code);
+
                             var lineCode = error.CompilationErrorModel.Location.ToCodeLineString();
-                            nodeText = nodeText.Replace(lineCode, lineCode.Replace(code, Regex.Replace(code, regexPattern, regexReplacement)));
+
+                            if(regexPattern == "$this")
+                            {
+                                nodeText = nodeText.Replace(lineCode,
+                                   lineCode.Replace(code, regexReplacement)
+                                   );
+                            }
+                            else
+                            {
+                                nodeText = nodeText.Replace(lineCode,
+                                   lineCode.Replace(code,
+                                           Regex.Replace(code, regexPattern, regexReplacement)
+                                       )
+                                   );
+                            }
+
                         }
                         break;
 
                     case AnalyzeType.Line:
                         {
                             var code = error.CompilationErrorModel.Location.ToCodeLineString();
-                            nodeText = nodeText.Replace(code, Regex.Replace(code, regexPattern, regexReplacement));
+
+                            regexReplacement = regexReplacement.Replace("$this", code);
+
+                            if (regexPattern == "$this")
+                            {
+                                nodeText = nodeText.Replace(code, regexReplacement);
+                            }
+                            else
+                            {
+                                nodeText = nodeText.Replace(code,
+                                    Regex.Replace(code, regexPattern, regexReplacement)
+                                );
+                            }
                         }
                         break;
-                    
+
                     case AnalyzeType.Method:
                     case AnalyzeType.All:
-                        nodeText = Regex.Replace(nodeText, regexPattern, regexReplacement);
-                        break;
+                        regexReplacement = regexReplacement.Replace("$this", nodeText);
 
+                        if (regexPattern == "$this")
+                        {
+                            nodeText = nodeText.Replace(nodeText, regexReplacement);
+                        }
+                        else
+                        {
+                            nodeText = Regex.Replace(nodeText, regexPattern, regexReplacement);
+                        }
+                        break;
                 }
             }
         }
 
+        if (DeclarationType.All == declarationType)
+            return ToSyntaxNodeAll(nodeText);
+
         return ToSyntaxNode(nodeText);
     }
 
-    private SyntaxNode ToSyntaxNode(string code)
+    protected static SyntaxNode ToSyntaxNode(string code)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-        return syntaxTree.GetRoot();
+        var getRoot = syntaxTree.GetRoot().DescendantNodes().FirstOrDefault();
+        return getRoot;
+    }
+    protected static SyntaxNode ToSyntaxNodeAll(string code)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
+        var getRoot = syntaxTree.GetRoot();
+        return getRoot;
     }
 
     public bool TryGetCompilationError((int, int) location, out List<AnalyzeCompilationErrorModel> errorsOut)

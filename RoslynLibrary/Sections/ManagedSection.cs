@@ -8,6 +8,6 @@ namespace RoslynLibrary.Sections
 {
     public class ManagedSection
     {
-        public string Path { get; set; }
+        public virtual string Path { get; set; }
     }
 }

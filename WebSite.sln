@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynLibrary", "RoslynLibr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{1C4D02A8-57FB-4A77-AFFE-2E978E87B632}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{04C494EA-477C-446E-A4E6-CBE619C5FB04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{04C494EA-477C-446E-A4E6-CBE619C5FB04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\WpfApp.csproj", "{3382A992-DBB3-4627-99A8-5569349016EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{04C494EA-477C-446E-A4E6-CBE619C5FB04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04C494EA-477C-446E-A4E6-CBE619C5FB04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04C494EA-477C-446E-A4E6-CBE619C5FB04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3382A992-DBB3-4627-99A8-5569349016EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3382A992-DBB3-4627-99A8-5569349016EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3382A992-DBB3-4627-99A8-5569349016EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3382A992-DBB3-4627-99A8-5569349016EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
