@@ -1,9 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using RoslynLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -23,6 +25,7 @@ namespace RoslynLibrary.Services
 
         public async Task<SyntaxNode> Fix(SyntaxTree tree, IEnumerable<AnalyzeBaseModel> analyzeBaseModels)
         {
+            var obj = JsonConvert.SerializeObject(analyzeBaseModels);
             //await _pluginDiagnosticsAnalyzer.AnalyzeCompilation(tree);
             return await _codeErrorFixer.VisitAndFixErrors(tree.GetRoot(), analyzeBaseModels);
         }

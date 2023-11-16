@@ -29,19 +29,19 @@ namespace ConsoleApp1
             var node = await _pluginFixService.Fix(tree, new List<AnalyzeBaseModel>()
             {
                 //$errorGroup1
-                new AnalyzeBaseModel()
-                {
-                    ErrorText = "Аргумент 1: не удается преобразовать из \"(NetworkableId)\" в \"uint\".",
-                    AnalyzeType = AnalyzeType.All,
-                    DeclarationType = DeclarationType.All,
-                    RegexPattern = @"
-var code = ""$this"";
-if(code.Contains(""uint""))
-{
-  net.ID
-}",
-                    RegexReplacement = "ulong"
-                }
+//                new AnalyzeBaseModel()
+//                {
+//                    ErrorText = "Аргумент 1: не удается преобразовать из \"(NetworkableId)\" в \"uint\".",
+//                    AnalyzeType = AnalyzeType.All,
+//                    DeclarationType = DeclarationType.All,
+//                    RegexPattern = @"
+//var code = ""$this"";
+//if(code.Contains(""uint""))
+//{
+//  net.ID
+//}",
+//                    RegexReplacement = "ulong"
+//                }
             });
 
             tree = CSharpSyntaxTree.ParseText(node.ToFullString());
@@ -51,7 +51,7 @@ if(code.Contains(""uint""))
 
             foreach (var error in errors)
             {
-                Console.WriteLine($"[{error.Line}:б{error.Symbol}] " + error.Text);
+                Console.WriteLine($"[{error.Line}:б{error.Symbol}] " + error.Text + " " + error.GetCode());
             }
 
         }
