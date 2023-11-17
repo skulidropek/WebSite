@@ -22,7 +22,6 @@ namespace RoslynLibrary.Services.Analyzer
         {
             var code = error.Location.ToCodeLocationString();
 
-            var obj = CSharpScript.RunAsync(code, ScriptOptions.Default.WithImports("System")).GetAwaiter().GetResult();
                      // .ContinueWith("Test.PrintLine(\"Hello World\");");
 
             //regexPattern = regexPattern.Replace("$this", code);
