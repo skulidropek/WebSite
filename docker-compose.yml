@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  webapi:
+    ports:
+      - "8080:80"
+    image: ${DOCKER_REGISTRY-}webapi
+    build:
+      context: .
+      dockerfile: WebApi/Dockerfile

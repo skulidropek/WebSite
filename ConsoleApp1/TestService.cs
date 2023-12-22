@@ -53,7 +53,6 @@ namespace ConsoleApp1
             {
                 Console.WriteLine($"[{error.Line}:б{error.Symbol}] " + error.Text + " " + error.GetCode());
             }
-
         }
     }
 }
