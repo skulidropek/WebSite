@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Input;
 using WpfApp.Core;
 using WpfApp.Core.Services;
+using WpfApp.Core.Services.Interfaces;
 using WpfApp.Models;
 using WpfApp.View;
 
@@ -26,7 +27,7 @@ namespace WpfApp.ViewModel
         private readonly PageService _pageService;
         private readonly PluginFixService _pluginFixService;
         private readonly PluginDiagnosticsAnalyzerService _pluginDiagnosticsAnalyzerService;
-        private readonly ConfigurationService _configurationService;
+        private readonly IConfigurationService _configurationService;
         private Microsoft.CodeAnalysis.SyntaxTree _syntaxTree;
 
         public IEnumerable<AnalyzeBaseOverrideModel> YourItems => _configurationService.AnalyzeBaseOverrideModels.OrderByDescending(s => s.IsActive);
@@ -62,7 +63,7 @@ namespace WpfApp.ViewModel
             _langService = ServiceManager.ServiceProvider.GetRequiredService<LangService>();
             _pluginFixService = ServiceManager.ServiceProvider.GetRequiredService<PluginFixService>();
             _pluginDiagnosticsAnalyzerService = ServiceManager.ServiceProvider.GetRequiredService<PluginDiagnosticsAnalyzerService>();
-            _configurationService = ServiceManager.ServiceProvider.GetRequiredService<ConfigurationService>();
+            _configurationService = ServiceManager.ServiceProvider.GetRequiredService<IConfigurationService>();
 
             ChoicePluginCommand = new RelayCommand(ChoicePluginCommandExecute);
             RoslynPageOpenCommand = new RelayCommand(RoslynPageOpenCommandExecute);

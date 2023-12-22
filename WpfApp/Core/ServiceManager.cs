@@ -11,6 +11,7 @@ using WpfApp.View;
 using RoslynLibrary.Sections;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WpfApp.Core.Services.Interfaces;
 
 namespace WpfApp.Core
 {
@@ -26,7 +27,7 @@ namespace WpfApp.Core
 
             services.AddSingleton<PageService>();
             services.AddSingleton<LangService>();
-            services.AddSingleton<ConfigurationService>();
+            services.AddSingleton<IConfigurationService, ConfigurationService>();
 
             services.AddScoped<RegistryService>();
             services.PostConfigure<ManagedSection>(s =>
