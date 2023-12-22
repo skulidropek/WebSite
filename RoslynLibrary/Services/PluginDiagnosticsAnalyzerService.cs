@@ -1,7 +1,4 @@
-﻿using ICSharpCode.Decompiler;
-using ICSharpCode.Decompiler.CSharp;
-using ICSharpCode.Decompiler.TypeSystem;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +21,12 @@ namespace RoslynLibrary.Services
         public PluginDiagnosticsAnalyzerService(IOptions<ManagedSection> managedSection)
         {
             _managedSection = managedSection.Value;
+        }
+
+        public async Task<List<CompilationErrorModel>> AnalyzeCompilationAsync(string plugin)
+        {
+            var tree = CSharpSyntaxTree.ParseText(plugin);
+            return await AnalyzeCompilationAsync(tree);
         }
 
         public async Task<List<CompilationErrorModel>> AnalyzeCompilationAsync(SyntaxTree syntaxTree)

@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfApp.Core.Services.Interfaces;
 using WpfApp.Models;
 
 namespace WpfApp.Core.Services
 {
-    internal class ConfigurationService
+    internal class ConfigurationService : IConfigurationService
     {
-        public List<AnalyzeBaseOverrideModel> AnalyzeBaseOverrideModels = new List<AnalyzeBaseOverrideModel>()
+        IEnumerable<AnalyzeBaseOverrideModel> IConfigurationService.AnalyzeBaseOverrideModels { get; } = new List<AnalyzeBaseOverrideModel>()
         {
             //new AnalyzeBaseOverrideModel()
             //{
@@ -574,5 +575,6 @@ $1.serverInput.previous = $2.previous;
                 Description = "Заменяет .net.ID на .net.ID.Value",
             },
         };
+
     }
 }
