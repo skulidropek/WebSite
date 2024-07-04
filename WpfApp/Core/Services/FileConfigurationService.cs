@@ -29,11 +29,12 @@ namespace WpfApp.Core.Services
 
             foreach (var file in Directory.GetFiles("Files"))
             {
-                var configuration = JsonFileSerializer.Deserialize<AnalyzeConfigurationService>(file);
+                var fullPath = Path.GetFullPath(file);
+                var configuration = JsonFileSerializer.Deserialize<AnalyzeConfigurationService>(fullPath);
                 
-                if(configuration == null || configuration.ConfigurationName == null)
+                if(configuration == null || configuration.ConfigurationName == null || configuration.AnalyzeBaseModels == null)
                 {
-                    var diagnosticsConfiguration = JsonFileSerializer.Deserialize<DiagnosticsAnalyzerConfigurationService>(file);
+                    var diagnosticsConfiguration = JsonFileSerializer.Deserialize<DiagnosticsAnalyzerConfigurationService>(fullPath);
 
                     if (_diagnosticsAnalyzeConfigurationServices.ContainsKey(diagnosticsConfiguration.ConfigurationName))
                     {
