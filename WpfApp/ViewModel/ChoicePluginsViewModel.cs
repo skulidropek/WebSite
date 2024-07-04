@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using RoslynLibrary.Sections;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -13,43 +14,72 @@ using System.Windows;
 using System.Windows.Input;
 using WpfApp.Core;
 using WpfApp.Core.Services;
+using WpfApp.Core.Services.Interfaces;
 using WpfApp.Models;
 
-namespace RustErrorsFix.ViewModel
+namespace WpfApp.ViewModel
 {
     internal class ChoicePluginsViewModel : ViewModelBase
     {
         private readonly LangService _langService;
         private readonly PageService _pageService;
-        private readonly ManagedSection _managedSection;
+        private readonly ConfigurationService _configurationService;
+        private readonly FileConfigurationService _fileConfigurationService;
 
-        private bool _roslynReferenseHave => !string.IsNullOrEmpty(_managedSection.Path);
+        //private bool _roslynReferenseHave => !string.IsNullOrEmpty(_managedSection.Path);
 
-        public string RoslynButtonText => _roslynReferenseHave ? _langService.GetLang("Select") : _langService.GetLang("SelectFolderManaged");
+      //  public string RoslynButtonText => _roslynReferenseHave ? _langService.GetLang("Select") : _langService.GetLang("SelectFolderManaged");
 
         public string SelectPluginText => _langService.GetLang("SelectPlugin");
+
+        public ObservableCollection<ButtonModel> ButtonModels { get; } = new ObservableCollection<ButtonModel>();
 
         public ICommand RoslynPageOpenCommand { get; private set; }
         public ICommand ResetManagedFolderCommand { get; private set; }
 
         public ChoicePluginsViewModel()
         {
-            _managedSection = ServiceManager.ServiceProvider.GetRequiredService<IOptions<ManagedSection>>().Value;
+            //_managedSection = ServiceManager.ServiceProvider.GetRequiredService<IOptions<ManagedSection>>().Value;
             _pageService = ServiceManager.ServiceProvider.GetRequiredService<PageService>();
             _langService = ServiceManager.ServiceProvider.GetRequiredService<LangService>();
+            _configurationService = ServiceManager.ServiceProvider.GetRequiredService<ConfigurationService>();
+
+            _fileConfigurationService = ServiceManager.ServiceProvider.GetRequiredService<FileConfigurationService>();
+
+            var registryService = ServiceManager.ServiceProvider.GetRequiredService<RegistryService>();
+
+            //SelectFolderManaged
+
+            _fileConfigurationService.GetAnalyzeConfigurationServices().Select(s => new ButtonModel(s)).ToList().ForEach(ButtonModels.Add);
 
             RoslynPageOpenCommand = new RelayCommand(RoslynPageOpenCommandExecute);
-            ResetManagedFolderCommand = new RelayCommand(ResetManagedFolderCommandExecute, (obj) => !string.IsNullOrEmpty(_managedSection.Path));
+            ResetManagedFolderCommand = new RelayCommand(ResetManagedFolderCommandExecute);//,// (obj) => !string.IsNullOrEmpty(_managedSection.Path));
 
             _langService.Subscribe(OnLangChanged);
 
             _langService.OnLangChangedInvoke();
         }
 
+        // <Image Source="/wwwroot/Images/reset.png"/>
         private void ResetManagedFolderCommandExecute(object obj)
         {
-            _managedSection.Path = "";
-            OnPropertyChanged("RoslynButtonText");
+            if (obj is not ButtonModel)
+                return;
+
+            var button = obj as ButtonModel;
+
+            var registryService = ServiceManager.ServiceProvider.GetRequiredService<RegistryService>();
+
+            var key = button.AnalyzeConfigurationService.ConfigurationName + "RustReferensePath";
+
+            if (string.IsNullOrEmpty(registryService.GetValue(key)))
+            {
+                registryService.AddValue(key, "");
+                return;
+            }
+
+            registryService.SetValue(key, "");
+            button.UpdateUI();
         }
 
         ~ChoicePluginsViewModel()
@@ -59,16 +89,23 @@ namespace RustErrorsFix.ViewModel
 
         public void OnLangChanged(bool en)
         {
-            OnPropertyChanged("SelectPluginText");
-            OnPropertyChanged("RoslynButtonText");
+            foreach(var button in ButtonModels)
+            {
+                button.UpdateUI();
+            }
         }
 
         public void RoslynPageOpenCommandExecute(object obj)
         {
-            var path = _managedSection.Path;
-            if (string.IsNullOrEmpty(path))
+            if(obj is not ButtonModel)
+                return;
+
+            var button = obj as ButtonModel;
+
+
+            if (button.ButtonResetVisibility == Visibility.Hidden)
             {
-                path = GetPathOpenFolderDialog();
+                var path = GetPathOpenFolderDialog();
 
                 if(string.IsNullOrEmpty(path))
                 {
@@ -76,11 +113,27 @@ namespace RustErrorsFix.ViewModel
                     return;
                 }
 
-                _managedSection.Path = path;
-                OnPropertyChanged("RoslynButtonText");
+                //var overrideSection = new ManagedSectionOverride();
+                //overrideSection.Path = path;
+                //_managedSection.Path = path;
+
+                var registryService = ServiceManager.ServiceProvider.GetRequiredService<RegistryService>();
+
+                var key = button.AnalyzeConfigurationService.ConfigurationName + "RustReferensePath";
+
+                if (string.IsNullOrEmpty(registryService.GetValue(key)))
+                {
+                    registryService.AddValue(key, path);
+                    button.UpdateUI();
+                    return;
+                }
+                registryService.SetValue(key, path);
+                button.UpdateUI();
                 return;
             }
 
+            var configurationService = ServiceManager.ServiceProvider.GetRequiredService<ConfigurationService>();
+            configurationService.AnalyzeConfiguration = button.AnalyzeConfigurationService;
             _pageService.OpenRoslyn();
         }
 

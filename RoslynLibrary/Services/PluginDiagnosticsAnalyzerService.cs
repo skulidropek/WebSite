@@ -17,10 +17,12 @@ namespace RoslynLibrary.Services
     public class PluginDiagnosticsAnalyzerService
     {
         private readonly ManagedSection _managedSection;
+        private readonly DiagnosticAnalyzerService _diagnosticAnalyzerService;
 
-        public PluginDiagnosticsAnalyzerService(IOptions<ManagedSection> managedSection)
+        public PluginDiagnosticsAnalyzerService(IOptions<ManagedSection> managedSection, DiagnosticAnalyzerService diagnosticAnalyzerService)
         {
             _managedSection = managedSection.Value;
+            _diagnosticAnalyzerService =diagnosticAnalyzerService;
         }
 
         public async Task<List<CompilationErrorModel>> AnalyzeCompilationAsync(string plugin)
@@ -65,14 +67,17 @@ namespace RoslynLibrary.Services
 
         private async Task<ImmutableArray<Diagnostic>> GetAnalysisResultsAsync(CSharpCompilation compilation)
         {
-            // var diagnosticAnalyzers = new List<DiagnosticAnalyzer>();
-            // var analyzers = diagnosticAnalyzers.ToImmutableArray();
-            //// var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
-            // var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+            List<DiagnosticAnalyzer> diagnosticAnalyzers = new List<DiagnosticAnalyzer>
+            {
+                _diagnosticAnalyzerService
+            };
 
-            //diagnostics.AddRange()
+            var analyzers = diagnosticAnalyzers.ToImmutableArray();
+            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+            var diagnostics = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
 
-            return compilation.GetDiagnostics();
+            diagnostics = diagnostics.AddRange(compilation.GetDiagnostics());
+            return diagnostics;
         }
     }
 }

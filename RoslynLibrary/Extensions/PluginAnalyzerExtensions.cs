@@ -27,6 +27,7 @@ namespace RoslynLibrary.Extensions
             services.AddScoped<CodeErrorFixerService>();
 
             services.AddScoped<CSharpDecompileService>();
+            services.AddScoped<DiagnosticAnalyzerService>();
 
             services.AddScoped<IAnalyzer, ErrorAnalyzer>();
             services.AddScoped<IAnalyzer, LineAnalyzer>();

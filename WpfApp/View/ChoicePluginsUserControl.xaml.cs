@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32;
-using RustErrorsFix.ViewModel;
+using WpfApp.ViewModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

@@ -97,7 +97,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontSize" Value="32"/>
             <Setter Property="MinWidth" Value="242" />
-            <Setter Property="MaxWidth" Value="500" />
+            <Setter Property="MaxWidth" Value="900" />
             <Setter Property="MinHeight" Value="48" />
             <Setter Property="MaxHeight" Value="68" />
 

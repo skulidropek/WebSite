@@ -20,6 +20,7 @@
     <None Remove="wwwroot\Images\favicon.png" />
     <None Remove="wwwroot\Images\fioletov.png" />
     <None Remove="wwwroot\Images\Logo.png" />
+    <None Remove="wwwroot\Images\reset.png" />
     <None Remove="wwwroot\Images\Screenshot_1 1.png" />
   </ItemGroup>
 
@@ -45,6 +46,7 @@
     <Resource Include="wwwroot\Images\favicon.png" />
     <Resource Include="wwwroot\Images\fioletov.png" />
     <Resource Include="wwwroot\Images\Logo.png" />
+    <Resource Include="wwwroot\Images\reset.png" />
     <Resource Include="wwwroot\Images\Screenshot_1 1.png" />
   </ItemGroup>
 

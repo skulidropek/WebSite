@@ -7,8 +7,9 @@ using WpfApp.Models;
 
 namespace WpfApp.Core.Services.Interfaces
 {
-    internal interface IConfigurationService
+    internal interface IAnalyzeConfigurationService
     {
-        IEnumerable<AnalyzeBaseOverrideModel> AnalyzeBaseOverrideModels { get; }
+        string ConfigurationName { get; }
+        Lazy<List<AnalyzeBaseOverrideModel>> AnalyzeBaseOverrideModels { get; }
     }
 }

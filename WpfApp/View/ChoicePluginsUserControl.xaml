@@ -11,11 +11,38 @@
              xmlns:viewmodel="clr-namespace:WpfApp.ViewModel" 
              av:DataContext="{av:DesignInstance Type=viewmodel:ChoicePluginsViewModel}">
 
-    <StackPanel Width="600" VerticalAlignment="Center" HorizontalAlignment="Center">
+    <StackPanel Width="900" VerticalAlignment="Center" HorizontalAlignment="Center">
         <TextBlock FontWeight="Bold" FontSize="50" HorizontalAlignment="Center" Text="{Binding Path=SelectPluginText}" />
         <Border Width="381" HorizontalAlignment="Center" Margin="0 0 0 30" BorderThickness="0 0 0 1" BorderBrush="#72c0fe" />
-        <Button Content="{Binding Path=RoslynButtonText}" Style="{StaticResource BtnGradientBlue}" Command="{Binding Path=RoslynPageOpenCommand}" />
-        <Button Margin="0 30 0 0" Content="Reset Managed Folder" Command="{Binding Path=ResetManagedFolderCommand}" Style="{StaticResource BtnGradientBlue}" />
+
+        <ItemsControl Margin="50 0 0 0" ItemsSource="{Binding ButtonModels}"  HorizontalAlignment="Center">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                            Content="{Binding Path=ButtonText}" 
+                            Style="{StaticResource BtnGradientBlue}" 
+                            Command="{Binding DataContext.RoslynPageOpenCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                            CommandParameter="{Binding}"
+                                />
+
+                        <Button Grid.Column="1"
+                            Command="{Binding DataContext.ResetManagedFolderCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
+                            Background="Transparent"
+                            Visibility="{Binding Path=ButtonResetVisibility}"
+                            CommandParameter="{Binding}"
+                            Width="70">
+                            <Image Source="/wwwroot/Images/reset.png"/>
+                        </Button>
+                    </Grid> 
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
     </StackPanel>
 
 </UserControl>

@@ -8,9 +8,9 @@ namespace RoslynLibrary.Models
 {
     public enum AnalyzeType
     {
-        All,
-        Method,
-        Line,
-        Error
+        All = 0,
+        Method = 1,
+        Line = 2,
+        Error = 3
     }
 }

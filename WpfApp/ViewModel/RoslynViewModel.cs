@@ -27,10 +27,10 @@ namespace WpfApp.ViewModel
         private readonly PageService _pageService;
         private readonly PluginFixService _pluginFixService;
         private readonly PluginDiagnosticsAnalyzerService _pluginDiagnosticsAnalyzerService;
-        private readonly IConfigurationService _configurationService;
+        private readonly ConfigurationService _configurationService;
         private Microsoft.CodeAnalysis.SyntaxTree _syntaxTree;
 
-        public IEnumerable<AnalyzeBaseOverrideModel> YourItems => _configurationService.AnalyzeBaseOverrideModels.OrderByDescending(s => s.IsActive);
+        public IEnumerable<AnalyzeBaseOverrideModel> YourItems => _configurationService.AnalyzeConfiguration.AnalyzeBaseModels.OrderByDescending(s => s.IsActive);
 
         private string _pluginPath; 
         public string ChoiceButtonText => _langService.GetLang("Fix");
@@ -63,7 +63,7 @@ namespace WpfApp.ViewModel
             _langService = ServiceManager.ServiceProvider.GetRequiredService<LangService>();
             _pluginFixService = ServiceManager.ServiceProvider.GetRequiredService<PluginFixService>();
             _pluginDiagnosticsAnalyzerService = ServiceManager.ServiceProvider.GetRequiredService<PluginDiagnosticsAnalyzerService>();
-            _configurationService = ServiceManager.ServiceProvider.GetRequiredService<IConfigurationService>();
+            _configurationService = ServiceManager.ServiceProvider.GetRequiredService<ConfigurationService>();
 
             ChoicePluginCommand = new RelayCommand(ChoicePluginCommandExecute);
             RoslynPageOpenCommand = new RelayCommand(RoslynPageOpenCommandExecute);
@@ -98,7 +98,7 @@ namespace WpfApp.ViewModel
 
             foreach (var error in Errors)
             {
-                foreach (var roslynError in _configurationService.AnalyzeBaseOverrideModels)
+                foreach (var roslynError in _configurationService.AnalyzeConfiguration.AnalyzeBaseModels)
                 {
                     if (Regex.IsMatch(error, roslynError.ErrorText))
                         roslynError.IsActive = true;
@@ -121,7 +121,7 @@ namespace WpfApp.ViewModel
 
         public async void ChoicePluginCommandExecute(object obj)
         {
-            var plugin = (await _pluginFixService.Fix(_syntaxTree, _configurationService.AnalyzeBaseOverrideModels)).ToFullString();
+            var plugin = (await _pluginFixService.Fix(_syntaxTree, _configurationService.AnalyzeConfiguration.AnalyzeBaseModels)).ToFullString();
 
             _syntaxTree = CSharpSyntaxTree.ParseText(plugin);
 
@@ -135,12 +135,12 @@ namespace WpfApp.ViewModel
                     "Discord - https://discord.gg/k3hXsVua7Q \n" +
                     "Discord The Rust Bay - https://discord.gg/Zq3TVjxKWk  */";
 
-            foreach (var roslynError in _configurationService.AnalyzeBaseOverrideModels)
+            foreach (var roslynError in _configurationService.AnalyzeConfiguration.AnalyzeBaseModels)
                 roslynError.IsActive = false;
 
             foreach (var error in Errors)
             {
-                foreach (var roslynError in _configurationService.AnalyzeBaseOverrideModels)
+                foreach (var roslynError in _configurationService.AnalyzeConfiguration.AnalyzeBaseModels)
                 {
                     if (Regex.IsMatch(error, roslynError.ErrorText))
                         roslynError.IsActive = true;

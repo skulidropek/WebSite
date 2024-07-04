@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfApp.Core.Services.Interfaces;
 
 namespace WpfApp.Core.Services
 {
     internal class RegistryService
     {
-        const string RegistryName = "RustErrorsFix2";
+        private const string _name = "RustErrorsFix";
+        //private readonly ConfigurationService _configurationService;
+
 
         public void AddValue(string valueName, string value)
         {
-            var registry = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(RegistryName);
+            var registry = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(_name);
             if (registry == null)
                 return;
 
@@ -22,7 +25,7 @@ namespace WpfApp.Core.Services
 
         public void SetValue(string valueName, string value)
         {
-            var registry = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RegistryName, true);
+            var registry = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(_name, true);
             if (registry == null)
                 return;
 
@@ -32,7 +35,7 @@ namespace WpfApp.Core.Services
 
         public string GetValue(string valueName)
         {
-            using (var registry = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RegistryName))
+            using (var registry = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(_name))
             {
                 if (registry == null)
                     return "";
