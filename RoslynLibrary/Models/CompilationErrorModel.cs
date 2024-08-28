@@ -11,10 +11,14 @@ namespace RoslynLibrary.Models
 {
     public class CompilationErrorModel
     {
-        public int Line;
-        public int Symbol;
-        public string Text;
-        public Location Location;
+        private string[] _extractedUniqueElements;
+        private string _text;
+
+        public int Line { get; set; }
+        public int Symbol { get; set; }
+        public string Text { get => _text; set { _text = value; _extractedUniqueElements = UniqueElementsExtractor.ExtractUniqueElements(value); } }
+        public Location Location { get; set; }
+        public string[] ExtractedUniqueElements => _extractedUniqueElements;
 
         public string GetCode()
         {

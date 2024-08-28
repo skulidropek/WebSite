@@ -18,15 +18,17 @@ namespace RoslynLibrary.Services
     {
         private readonly ManagedSection _managedSection;
         private readonly DiagnosticAnalyzerService _diagnosticAnalyzerService;
-
-        public PluginDiagnosticsAnalyzerService(IOptions<ManagedSection> managedSection, DiagnosticAnalyzerService diagnosticAnalyzerService)
+        private readonly AssemblyDataPoolService _assemblyDataPoolService;
+        public PluginDiagnosticsAnalyzerService(IOptions<ManagedSection> managedSection, DiagnosticAnalyzerService diagnosticAnalyzerService, AssemblyDataPoolService assemblyDataPoolService)
         {
             _managedSection = managedSection.Value;
-            _diagnosticAnalyzerService =diagnosticAnalyzerService;
+            _diagnosticAnalyzerService = diagnosticAnalyzerService;
+            _assemblyDataPoolService = assemblyDataPoolService;
         }
 
         public async Task<List<CompilationErrorModel>> AnalyzeCompilationAsync(string plugin)
         {
+
             var tree = CSharpSyntaxTree.ParseText(plugin);
             return await AnalyzeCompilationAsync(tree);
         }

@@ -32,6 +32,7 @@ namespace RoslynLibrary.Extensions
             services.AddScoped<IAnalyzer, ErrorAnalyzer>();
             services.AddScoped<IAnalyzer, LineAnalyzer>();
             services.AddScoped<IAnalyzer, MethodAnalyzer>();
+            services.AddSingleton<AssemblyDataPoolService>();
 
             return services;
         }
