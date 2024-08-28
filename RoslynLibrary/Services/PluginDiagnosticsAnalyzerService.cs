@@ -55,6 +55,7 @@ namespace RoslynLibrary.Services
         private CSharpCompilation CreateAnalyzer(SyntaxTree source, string compilationName, string managedFolder)
         {
             var references = Directory.GetFiles(managedFolder)
+                                     .Where(s => s.EndsWith(".dll"))
                                      .Where(f => !f.Contains("Newtonsoft.Json.dll"))
                                      .Select(path => MetadataReference.CreateFromFile(path.Replace("\n", "").Replace("\r", "")))
                                      .ToList();
