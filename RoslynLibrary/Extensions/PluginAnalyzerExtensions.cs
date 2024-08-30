@@ -31,7 +31,7 @@ namespace RoslynLibrary.Extensions
 
             services.AddScoped<IAnalyzer, ErrorAnalyzer>();
             services.AddScoped<IAnalyzer, LineAnalyzer>();
-            services.AddScoped<IAnalyzer, MethodAnalyzer>();
+            services.AddScoped<IAnalyzer, AllOrMethodAnalyzer>();
 
             return services;
         }

@@ -10,7 +10,7 @@ using static ICSharpCode.Decompiler.IL.Transforms.Stepper;
 
 namespace RoslynLibrary.Services.Analyzer
 {
-    internal class MethodAnalyzer : IAnalyzer
+    internal class AllOrMethodAnalyzer : IAnalyzer
     {
         public bool CanHandle(AnalyzeType analyzeType)
         {
