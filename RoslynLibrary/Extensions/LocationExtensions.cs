@@ -26,6 +26,23 @@ namespace RoslynLibrary.Extensions
             return lineText;
         }
 
+        public static string ToFormattedCodeLines(this Location location)
+        {
+            SourceText sourceText = location.SourceTree.GetText();
+            int startLine = sourceText.Lines.GetLineFromPosition(location.SourceSpan.Start).LineNumber;
+            int endLine = sourceText.Lines.GetLineFromPosition(location.SourceSpan.End).LineNumber;
+
+            var lines = new StringBuilder();
+
+            for (int i = startLine; i <= endLine; i++)
+            {
+                string lineText = sourceText.Lines[i].ToString();
+                lines.AppendLine($"{i + 1}: {lineText}");
+            }
+
+            return lines.ToString();
+        }
+
         public static (int, int) GetStartAndEndLines(this Location location)
         {
             var syntaxTree = location.SourceTree;

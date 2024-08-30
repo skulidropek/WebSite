@@ -39,13 +39,7 @@ namespace RoslynLibrary.Services
             {
                 if (diagnostic.DefaultSeverity == DiagnosticSeverity.Error)
                 {
-                    errors.Add(new CompilationErrorModel()
-                    {
-                        Line = diagnostic.Location.GetLineSpan().StartLinePosition.Line,
-                        Symbol = diagnostic.Location.GetLineSpan().StartLinePosition.Character,
-                        Text = diagnostic.GetMessage(),
-                        Location = diagnostic.Location
-                    });
+                    errors.Add(new CompilationErrorModel(diagnostic.Location, diagnostic.GetMessage()));
                 }
             }
 

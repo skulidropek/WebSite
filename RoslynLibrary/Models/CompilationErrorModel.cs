@@ -1,20 +1,36 @@
 ﻿using Microsoft.CodeAnalysis;
 using RoslynLibrary.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace RoslynLibrary.Models
 {
     public class CompilationErrorModel
     {
-        public int Line;
-        public int Symbol;
-        public string Text;
-        public Location Location;
+        public string Text { get; set; }
+        public Location Location { get; private set; }
+
+        public int Line
+        {
+            get
+            {
+                var lineSpan = Location.GetLineSpan();
+                return lineSpan.StartLinePosition.Line + 1;
+            }
+        }
+
+        public int Symbol
+        {
+            get
+            {
+                var lineSpan = Location.GetLineSpan();
+                return lineSpan.StartLinePosition.Character + 1;
+            }
+        }
+
+        public CompilationErrorModel(Location location, string text)
+        {
+            Location = location;
+            Text = text;
+        }
 
         public string GetCode()
         {

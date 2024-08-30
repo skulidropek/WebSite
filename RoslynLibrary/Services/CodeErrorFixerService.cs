@@ -6,6 +6,7 @@ using RoslynLibrary.Extensions;
 using RoslynLibrary.Services;
 using System.Text.RegularExpressions;
 using RoslynLibrary.Services.Analyzer;
+using System.Text;
 
 public class CodeErrorFixerService : CSharpSyntaxRewriter
 {
@@ -91,7 +92,6 @@ public class CodeErrorFixerService : CSharpSyntaxRewriter
                     regexPattern = regexPattern.Replace($"$errorGroup{i}", match.Groups[i].Value);
                     regexReplacement = regexReplacement.Replace($"$errorGroup{i}", match.Groups[i].Value);
                 }
-
 
                 IAnalyzer analyzer = _analyzers.First(a => a.CanHandle(analyze.AnalyzeType));
                 nodeText = analyzer.Analyze(error.CompilationErrorModel, nodeText, regexPattern, regexReplacement);
