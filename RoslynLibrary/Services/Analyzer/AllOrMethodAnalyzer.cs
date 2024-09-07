@@ -22,7 +22,7 @@ namespace RoslynLibrary.Services.Analyzer
         public string Analyze(CompilationErrorModel error, string nodeText, string regexPattern, string regexReplacement)
         {
             if(regexPattern == "$this")
-                return regexReplacement;
+                return regexReplacement.Replace("$this", nodeText);
 
             regexPattern = regexPattern.Replace("$errorLine", error.Line.ToString());
 
